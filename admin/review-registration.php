@@ -40,9 +40,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($result) {
             // Log action
             executeQuery(
-                "INSERT INTO admin_logs (admin_id, action, target_user_id, ip_address, details) VALUES (?, ?, ?, ?, ?)",
-                "issss",
-                [$admin['id'], "User " . strtolower($action), $userId, $_SERVER['REMOTE_ADDR'], "Registration review"]
+                "INSERT INTO admin_logs (admin_id, action, details) VALUES (?, ?, ?)",
+                "iss",
+                [$admin['id'], "User " . strtolower($action), "Registration review - User ID: " . $userId]
             );
             header('Location: /LoaningSystem/admin/registrations.php?message=' . urlencode('User ' . strtolower($action) . ' successfully'));
             exit;

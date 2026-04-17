@@ -78,11 +78,12 @@ class Registration {
         
         // Check account type limits for Premium
         if ($data['account_type'] === 'Premium') {
-            $premiumCount = fetchRow(
-                "SELECT COUNT(*) as count FROM users WHERE account_type = 'Premium' AND status != 'Rejected'",
-                "", []
-            );
-            if ($premiumCount['count'] >= MAX_PREMIUM_MEMBERS) {
+            global $mysqli;
+            $stmt = $mysqli->prepare("SELECT COUNT(*) as count FROM users WHERE account_type = 'Premium' AND status != 'Rejected'");
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $premiumCount = $result->fetch_assoc();
+            if ($premiumCount && $premiumCount['count'] >= MAX_PREMIUM_MEMBERS) {
                 return ['success' => false, 'message' => 'Premium account slots are full. Please choose Basic account.'];
             }
         }
@@ -97,8 +98,8 @@ class Registration {
         try {
             // Insert user
             $insertUser = executeQuery(
-                "INSERT INTO users (account_type, username, password, email, full_name, address, gender, birthday, age, contact_number, tin_number, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                "ssssssssdiss",
+                "INSERT INTO users (account_type, username, password, email, full_name, address, gender, birthday, contact_number, tin_number, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "sssssssssss",
                 [
                     $data['account_type'],
                     $data['username'],
@@ -108,7 +109,6 @@ class Registration {
                     $data['address'],
                     $data['gender'] ?? null,
                     $data['birthday'],
-                    $age,
                     $data['contact_number'],
                     $data['tin_number'],
                     STATUS_PENDING
@@ -135,7 +135,7 @@ class Registration {
             // Insert company details
             $insertCompany = executeQuery(
                 "INSERT INTO company_details (user_id, company_name, company_address, company_phone, position, monthly_earnings, hr_contact_number) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                "issssd s",
+                "issssds",
                 [
                     $userId,
                     $data['company_name'],
@@ -181,8 +181,14 @@ class Registration {
      * Get total pending registrations count
      */
     public static function getPendingCount() {
-        $result = fetchRow("SELECT COUNT(*) as count FROM users WHERE status = ?", "s", [STATUS_PENDING]);
-        return $result['count'];
+        global $mysqli;
+        $stmt = $mysqli->prepare("SELECT COUNT(*) as count FROM users WHERE status = ?");
+        $status = STATUS_PENDING;
+        $stmt->bind_param("s", $status);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        return $row ? $row['count'] : 0;
     }
     
     /**

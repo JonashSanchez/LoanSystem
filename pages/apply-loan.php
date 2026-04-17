@@ -41,7 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($result['success']) {
                 $success = $result['message'];
                 $loanDetails = $result['details'];
-                $dueDate = $result['due_date'];
+                // Calculate due date from loan term (months from today)
+                $dueDate = date('Y-m-d', strtotime("+" . $term . " months"));
             } else {
                 $error = $result['message'];
             }
@@ -56,7 +57,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apply for Loan - <?php echo APP_NAME; ?></title>
     <link rel="stylesheet" href="/LoaningSystem/public/css/style.css">
-    <script>
+    <style>
+        .form-container {
+            padding: 40px 44px;
+        }
+        
+        .form-container h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 24px;
+        }
+        
+        .form-container .form-section h3 {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
         function calculateLoan() {
             const amount = parseFloat(document.getElementById('amount').value) || 0;
             const term = parseInt(document.getElementById('term').value) || 0;

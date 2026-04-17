@@ -38,9 +38,20 @@ function executeQuery($query, $types = "", $params = []) {
  */
 function fetchRow($query, $types = "", $params = []) {
     $result = executeQuery($query, $types, $params);
-    if ($result && $result->num_rows > 0) {
-        return $result->fetch_assoc();
+    
+    // If executeQuery returns a statement (from prepared queries), get the result set
+    if ($result && is_object($result) && get_class($result) === 'mysqli_stmt') {
+        $resultSet = $result->get_result();
+        if ($resultSet && $resultSet->num_rows > 0) {
+            return $resultSet->fetch_assoc();
+        }
+    } elseif ($result && is_object($result) && get_class($result) === 'mysqli_result') {
+        // For direct queries without prepared statements
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc();
+        }
     }
+    
     return null;
 }
 
@@ -50,11 +61,24 @@ function fetchRow($query, $types = "", $params = []) {
 function fetchAll($query, $types = "", $params = []) {
     $result = executeQuery($query, $types, $params);
     $data = [];
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $data[] = $row;
+    
+    // If executeQuery returns a statement (from prepared queries), get the result set
+    if ($result && is_object($result) && get_class($result) === 'mysqli_stmt') {
+        $resultSet = $result->get_result();
+        if ($resultSet && $resultSet->num_rows > 0) {
+            while ($row = $resultSet->fetch_assoc()) {
+                $data[] = $row;
+            }
+        }
+    } elseif ($result && is_object($result) && get_class($result) === 'mysqli_result') {
+        // For direct queries without prepared statements
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
         }
     }
+    
     return $data;
 }
 ?>

@@ -56,6 +56,25 @@ $moneyBackHistory = MoneyBack::getMoneyBackHistory($user['id'], 10);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Premium Account - <?php echo APP_NAME; ?></title>
     <link rel="stylesheet" href="/LoaningSystem/public/css/style.css">
+    <style>
+        .page-header h1 {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        
+        .card-grid {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+        
+        .stat-box {
+            border-top: 4px solid var(--secondary);
+        }
+        
+        .card-header {
+            background: var(--lighter);
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
